@@ -48,10 +48,18 @@
         public readonly Dictionary<Suit, int> FoundationPile;
 
         /// <summary>
-        /// Tracks a new solitaire game, taking in the top cards of each pile.
+        /// Requests a card that was facedown. Used when drawing from stock pile
+        /// and revealing cards from the game board.
         /// </summary>
-        /// <param name=""></param>
-        public GameState(IEnumerable<Card> stackTopCards)
+        /// <returns>The card that was drawn.</returns>
+        private Func<Card> RequestCard;
+
+        /// <summary>
+        /// Tracks a new solitaire game.
+        /// </summary>
+        /// <param name="RequestCard">A function to get a new facedown card.</param>
+        /// <param name="topCards">The cards atop each pile on the board.</param>
+        public GameState(Func<Card> RequestCard, IEnumerable<Card> topCards)
         {
             // TODO: Constructor
             throw new NotImplementedException();
@@ -133,8 +141,15 @@
         /// </exception>
         public void MoveCards(int startPos, int bottomPos, int endPos)
         {
-            // TODO: MoveCards
-            throw new NotImplementedException();
+            // Ensure the move is valid
+
+            // Get a list of the cards that will be moved
+
+            // Add all cards to the new pile
+
+            // Remove all cards from the old pile
+
+            // Flip over a face-down card if necessary
         }
 
         /// <summary>
