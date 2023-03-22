@@ -6,47 +6,45 @@
         /// The cards that are known to be face-up and in play, either on the
         /// board or in the foundation piles.
         /// </summary>
-        public HashSet<Card> CardsInPlay { get; private set; }
+        public readonly HashSet<Card> CardsInPlay;
 
         /// <summary>
         /// The cards that are known to be in either the stock pile or the waste
         /// pile
         /// </summary>
-        public HashSet<Card> CardsInStock { get; private set; }
+        public readonly HashSet<Card> CardsInStock;
 
         /// <summary>
         /// The cards that are known to be in the foundation pile
         /// </summary>
-        public HashSet<Card> CardsInFoundations { get; private set; }
+        public readonly HashSet<Card> CardsInFoundations;
 
         /// <summary>
         /// The facedown cards in the Stock Pile. If a card is null it means
         /// we have not been through the pile yet.
         /// </summary>
-        public LinkedList<Card> StockPile { get; private set; }
+        public readonly Stack<Card> StockPile;
 
         /// <summary>
-        /// The faceup cards in the Waste Pile. When the StockPile is empty,
-        /// this becomes the new StockPile and is replaced with a new LinkedList.
-        /// 
-        /// We use a stack here instead of a queue because
+        /// The faceup cards in the Waste Pile. When the StockPile is empty
+        /// and reset, everything gets popped from this and pushed to the StockPile.
         /// </summary>
-        public LinkedList<Card> WastePile { get; private set; }
+        public readonly Stack<Card> WastePile;
 
-        private bool stockKnown; // If we have seen everything in the stockpile
+        private bool stockSeen; // If we have seen everything in the stockpile
 
         /// <summary>
         /// The faceup cards in the main game board. Has seven piles of cards.
         /// 
         /// These have to be lists because we can move any part of a stack.
         /// </summary>
-        public List<Card>[] Board { get; private set; }
+        public readonly List<Card>[] Board;
 
         /// <summary>
         /// The face-down cards on the board. There are 0-6 in each pile at the
         /// start of the game.
         /// </summary>
-        public int[] FaceDownCardsInBoard { get; private set; }
+        public readonly int[] FaceDownCardsInBoard;
 
         /// <summary>
         /// The top card of each foundation pile.
@@ -56,7 +54,7 @@
         /// 
         /// If an entry is null, there is nothing in the pile.
         /// </summary>
-        public Card?[] FoundationPile { get; private set; }
+        public readonly Card?[] FoundationPile;
 
         /// <summary>
         /// Tracks a new solitaire game, taking in the top cards of each pile.
@@ -78,9 +76,10 @@
         {
             if (StockPile.Count > 0) { throw new InvalidOperationException("Stockpile is not empty."); }
 
-            stockKnown = true;
-            StockPile = WastePile;
-            WastePile = new LinkedList<Card>();
+            stockSeen = true;
+
+            while (WastePile.Count > 0)
+                StockPile.Push(WastePile.Pop());
         }
 
         /// <summary>
@@ -152,6 +151,26 @@
         /// Thrown if there are any face-up cards in that pile.
         /// </exception>
         public bool RevealBoardCard(int pile, Card card)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the top card of every pile of the board.
+        /// </summary>
+        /// <remarks>Useful when calculating moves.</remarks>
+        /// <returns>An array of 7 cards.</returns>
+        public Card[] GetBoardPileTops()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the lowest face-up card of every pile of the board.
+        /// </summary>
+        /// <remarks>Useful when calculating moves.</remarks>
+        /// <returns>An array of 7 cards.</returns>
+        public Card[] GetBoardPileBottoms()
         {
             throw new NotImplementedException();
         }
