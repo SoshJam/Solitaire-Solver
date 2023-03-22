@@ -15,11 +15,6 @@
         public readonly HashSet<Card> CardsInStock;
 
         /// <summary>
-        /// The cards that are known to be in the foundation pile
-        /// </summary>
-        public readonly HashSet<Card> CardsInFoundations;
-
-        /// <summary>
         /// The facedown cards in the Stock Pile. If a card is null it means
         /// we have not been through the pile yet.
         /// </summary>
