@@ -1,17 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Solitaire
+﻿namespace Solitaire
 {
-    public struct Card
+    public class Card
     {
-        public Suit suit { get; private set; }
-        public int value { get; private set; }
-
-        public bool IsBlack
-        {
-            get { return suit == Suit.Spades || suit == Suit.Clubs; }
-            private set { IsBlack = value; } // Updating this will not do anything.
-        }
+        public readonly Suit suit;
+        public readonly int value;
 
         public Card(Suit suit, int value)
         {
@@ -19,29 +11,34 @@ namespace Solitaire
             this.value = value;
         }
 
+        /// <summary>
+        /// Converts the card to a string.
+        /// </summary>
+        /// <returns>The name of the card.</returns>
         public override string ToString()
         {
-            string valueString = "";
             switch (value)
             {
                 case 1:
-                    valueString = "Ace";
-                    break;
+                    return $"Ace of {suit}";
                 case 11:
-                    valueString = "Jack";
-                    break;
+                    return $"Jack of {suit}";
                 case 12:
-                    valueString = "Queen";
-                    break;
+                    return $"Queen of {suit}";
                 case 13:
-                    valueString = "King";
-                    break;
+                    return $"King of {suit}";
                 default:
-                    valueString = value.ToString();
-                    break;
+                    return $"{value} of {suit}";
             }
+        }
 
-            return $"{valueString} of {suit.ToString()}";
+        /// <summary>
+        /// If the card is a Spade or a Club.
+        /// </summary>
+        /// <returns>True if the card is black.</returns>
+        public bool IsBlack()
+        {
+            return suit == Suit.Spades || suit == Suit.Clubs;
         }
     }
 
