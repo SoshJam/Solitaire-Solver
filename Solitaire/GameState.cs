@@ -42,14 +42,10 @@
         public readonly int[] FaceDownCardsInBoard;
 
         /// <summary>
-        /// The top card of each foundation pile.
-        /// 
-        /// The items in the array are ordered by suit. Spades, Diamonds, Clubs,
-        /// Hearts.
-        /// 
-        /// If an entry is null, there is nothing in the pile.
+        /// The value of the top card of each foundation pile. If an entry is
+        /// 0, there is nothing in the pile.
         /// </summary>
-        public readonly Card?[] FoundationPile;
+        public readonly Dictionary<Suit, int> FoundationPile;
 
         /// <summary>
         /// Tracks a new solitaire game, taking in the top cards of each pile.
@@ -85,22 +81,28 @@
         /// If we haven't seen the whole stock pile, return true. If we have,
         /// return true if drawnCard matches what we got off the linked list.
         /// </returns>
+        /// <exception cref="InvalidOperationException">If the stock pile is empty.</exception>
         public bool DrawStockPile(Card drawnCard)
         {
-            // TODO: DrawStockPile
-            throw new NotImplementedException();
+            if (StockPile.Count == 0)
+                throw new InvalidOperationException("Stockpile is empty.");
+
+            Card newCard = StockPile.Pop();
+            WastePile.Push(drawnCard);
+
+            return !stockSeen || drawnCard.Equals(newCard);
         }
 
         /// <summary>
-        /// Gets the minimum value of the foundation pile. We should not add
-        /// a card to the foundation unless the target card is one above this
-        /// value. (All piles are maxed.)
+        /// Gets the minimum value of the cards atop the foundation piles.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The minimum value.</returns>
         public int MinimumFoundationValue()
         {
-            // TODO: MinimumFoundationValue
-            throw new NotImplementedException();
+            int blackMinimum = Math.Min(FoundationPile[Suit.Spades], FoundationPile[Suit.Clubs]);
+            int redMinimum = Math.Min(FoundationPile[Suit.Diamonds], FoundationPile[Suit.Hearts]);
+
+            return Math.Min(blackMinimum, redMinimum);
         }
 
         /// <summary>
@@ -112,11 +114,10 @@
         /// </exception>
         public void AddToFoundation(Card card)
         {
-            Card? topCard = FoundationPile[(int)card.suit];
-            int topValue = topCard is null ? 0 : ((Card)topCard).value;
+            int top = FoundationPile[card.suit];
 
-            if (topValue + 1 != card.value)
-                FoundationPile[(int)card.suit] = card;
+            if (top + 1 == card.value)
+                FoundationPile[card.suit] = card.value;
             else
                 throw new InvalidOperationException("Cannot add this card to the pile.");
         }
@@ -147,7 +148,14 @@
         /// </exception>
         public bool RevealBoardCard(int pile, Card card)
         {
-            throw new NotImplementedException();
+            if (Board[pile].Count > 0)
+                throw new InvalidOperationException("Pile is not empty.");
+
+            bool seen = CardsInPlay.Contains(card) || CardsInStock.Contains(card);
+            CardsInPlay.Add(card);
+            Board[pile].Add(card);
+
+            return !seen;
         }
 
         /// <summary>
@@ -157,7 +165,12 @@
         /// <returns>An array of 7 cards.</returns>
         public Card[] GetBoardPileTops()
         {
-            throw new NotImplementedException();
+            Card[] tops = new Card[7];
+            for (int i = 0; i < 7; i++)
+            {
+                tops[i] = Board[i].Last();
+            }
+            return tops;
         }
 
         /// <summary>
@@ -167,7 +180,12 @@
         /// <returns>An array of 7 cards.</returns>
         public Card[] GetBoardPileBottoms()
         {
-            throw new NotImplementedException();
+            Card[] bottoms = new Card[7];
+            for (int i = 0; i < 7; i++)
+            {
+                bottoms[i] = Board[i].First();
+            }
+            return bottoms;
         }
     }
 }
