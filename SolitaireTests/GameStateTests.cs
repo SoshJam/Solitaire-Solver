@@ -1,4 +1,4 @@
-global using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SolitaireTests
 {
