@@ -8,6 +8,9 @@
         public Card(Suit suit, int value)
         {
             this.suit = suit;
+
+            if (value < 1 || value > 13)
+                throw new ArgumentException("Card value must be between 1 and 13.");
             this.value = value;
         }
 
