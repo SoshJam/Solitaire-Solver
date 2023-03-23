@@ -52,17 +52,33 @@
         /// and revealing cards from the game board.
         /// </summary>
         /// <returns>The card that was drawn.</returns>
-        private Func<Card> RequestCard;
+        public delegate Card RequestCard();
 
         /// <summary>
         /// Tracks a new solitaire game.
         /// </summary>
-        /// <param name="RequestCard">A function to get a new facedown card.</param>
-        /// <param name="topCards">The cards atop each pile on the board.</param>
-        public GameState(Func<Card> RequestCard, IEnumerable<Card> topCards)
+        /// <param name="requestCard">A function to get the seven cards that will be face-up at the start of the game.</param>
+        public GameState(RequestCard requestCard)
         {
-            // TODO: Constructor
-            throw new NotImplementedException();
+            CardsInPlay = new HashSet<Card>();
+            CardsInStock = new HashSet<Card>();
+            StockPile = new Stack<Card>();
+            WastePile = new Stack<Card>();
+            Board = new List<Card>[7];
+            FaceDownCardsInBoard = new int[7];
+
+            FoundationPile = new Dictionary<Suit, int>();
+            FoundationPile[Suit.Spades] = 0;
+            FoundationPile[Suit.Hearts] = 0;
+            FoundationPile[Suit.Spades] = 0;
+            FoundationPile[Suit.Spades] = 0;
+
+            // Set up the game board with 0-6 facedown cards in each pile and one face-up card on top
+            for (int i = 0; i < 7; i++)
+            {
+                FaceDownCardsInBoard[i] = i;
+                Board[i] = new List<Card> { requestCard() };
+            }
         }
 
         /// <summary>
@@ -90,15 +106,27 @@
         /// return true if drawnCard matches what we got off the linked list.
         /// </returns>
         /// <exception cref="InvalidOperationException">If the stock pile is empty.</exception>
-        public bool DrawStockPile(Card drawnCard)
+        public bool DrawStockPile(RequestCard request)
         {
             if (StockPile.Count == 0)
                 throw new InvalidOperationException("Stockpile is empty.");
 
+            Card drawnCard = request();
             Card newCard = StockPile.Pop();
             WastePile.Push(drawnCard);
 
             return !stockSeen || drawnCard.Equals(newCard);
+        }
+
+        public Card RemoveFromWastePile()
+        {
+            if (WastePile.Count == 0)
+                throw new InvalidOperationException("Waste pile is empty");
+
+            Card card = WastePile.Pop();
+            CardsInStock.Remove(card);
+
+            return card;
         }
 
         /// <summary>
@@ -128,6 +156,8 @@
                 FoundationPile[card.suit] = card.value;
             else
                 throw new InvalidOperationException("Cannot add this card to the pile.");
+
+            CardsInPlay.Add(card);
         }
 
         /// <summary>
@@ -161,11 +191,12 @@
         /// <exception cref="InvalidOperationException">
         /// Thrown if there are any face-up cards in that pile.
         /// </exception>
-        public bool RevealBoardCard(int pile, Card card)
+        public bool RevealBoardCard(int pile, RequestCard request)
         {
             if (Board[pile].Count > 0)
                 throw new InvalidOperationException("Pile is not empty.");
 
+            Card card = request();
             bool seen = CardsInPlay.Contains(card) || CardsInStock.Contains(card);
             CardsInPlay.Add(card);
             Board[pile].Add(card);
