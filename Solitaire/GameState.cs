@@ -163,23 +163,56 @@
         /// <summary>
         /// Moves a stack of cards from one pile to another.
         /// </summary>
-        /// <param name="startPos">The pile the stack is in.</param>
-        /// <param name="bottomPos">The distance from the bottom of the stack to the bottom of its pile.</param>
-        /// <param name="endPos">The pile the stack will end up in.</param>
+        /// <param name="start">The pile the stack is in.</param>
+        /// <param name="offset">The distance from the bottom of the stack to the bottom of its pile.</param>
+        /// <param name="end">The pile the stack will end up in.</param>
+        /// <param name="request">A function to get a new card if the move would reveal one.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if the card cannot be moved for whatever reason.
         /// </exception>
-        public void MoveCards(int startPos, int bottomPos, int endPos)
+        public void MoveCards(int start, int offset, int end, RequestCard request)
         {
             // Ensure the move is valid
 
+            if (Board[start].Count == 0)
+                throw new ArgumentException("Start pile has no cards.");
+            if (Board[start].Count < offset)
+                throw new ArgumentException($"Start pile has less than {offset} cards.");
+
+            Card bottom = Board[start][offset];
+
+            if (Board[end].Count == 0 && (bottom.value != 13 || FaceDownCardsInBoard[end] != 0))
+                throw new ArgumentException("Target pile is not empty, or the moving card is not a king.");
+
+            Card top = Board[end].Last();
+
+            if (top.IsBlack() == bottom.IsBlack())
+                throw new ArgumentException("Cards must alternate color.");
+
+            if (top.value - 1 != bottom.value)
+                throw new ArgumentException("Card value must decrease.");
+
             // Get a list of the cards that will be moved
 
-            // Add all cards to the new pile
+            List<Card> movingCards = new List<Card>();
+            for (int i = offset; i < Board[start].Count; i++)
+                movingCards.Add(Board[start][i]);
 
-            // Remove all cards from the old pile
+            if (movingCards[0] != bottom)
+                throw new ArgumentException("Something went wrong counting cards.");
+
+            // Add all cards to the new pile and remove from the old
+
+            foreach (Card c in movingCards)
+            {
+                Board[start].Remove(c);
+                Board[end].Add(c);
+            }
 
             // Flip over a face-down card if necessary
+
+            if (offset == 0)
+                RevealBoardCard(start, request);
         }
 
         /// <summary>
