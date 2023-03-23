@@ -55,6 +55,15 @@ namespace Solitaire
         }
 
         /// <summary>
+        /// Converts the string to a hash code.
+        /// </summary>
+        /// <returns>The hash code.</returns>
+        public override int GetHashCode()
+        {
+            return suit.GetHashCode() * value.GetHashCode();
+        }
+
+        /// <summary>
         /// If the card is a Spade or a Club.
         /// </summary>
         /// <returns>True if the card is black.</returns>
