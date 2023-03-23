@@ -1,4 +1,6 @@
-﻿namespace Solitaire
+﻿using System.Text.RegularExpressions;
+
+namespace Solitaire
 {
     public class Card
     {
@@ -42,6 +44,64 @@
         public bool IsBlack()
         {
             return suit == Suit.Spades || suit == Suit.Clubs;
+        }
+
+        /// <summary>
+        /// Creates a card from a string. The string must be two characters long,
+        /// with the first representing the suit and the second represents the 
+        /// value. Value will be 1-9, or 0 representing a 10, a representing an
+        /// ace, j for jack, q for queen, or k for king.
+        /// </summary>
+        /// <param name="s">The input string</param>
+        /// <returns>A new Card created from the input string.</returns>
+        public static Card CardFromString(string s)
+        {
+            if (!Regex.IsMatch(s, @"^[sdch][\dajqk]$"))
+                throw new ArgumentException("Invalid input.");
+
+            Suit suit;
+            int value;
+
+            switch (s[0])
+            {
+                case 's':
+                default:
+                    suit = Suit.Spades;
+                    break;
+                case 'd':
+                    suit = Suit.Diamonds;
+                    break;
+                case 'c':
+                    suit = Suit.Clubs;
+                    break;
+                case 'h':
+                    suit = Suit.Hearts;
+                    break;
+            }
+
+            switch (s[1])
+            {
+                case 'a':
+                    value = 1;
+                    break;
+                case '0':
+                    value = 10;
+                    break;
+                case 'j':
+                    value = 11;
+                    break;
+                case 'q':
+                    value = 12;
+                    break;
+                case 'k':
+                    value = 13;
+                    break;
+                default:
+                    value = int.Parse($"{s}");
+                    break;
+            }
+
+            return new Card(suit, value);
         }
     }
 
