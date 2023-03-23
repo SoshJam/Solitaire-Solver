@@ -56,6 +56,8 @@ namespace Solitaire
         /// <returns>A new Card created from the input string.</returns>
         public static Card FromString(string s)
         {
+            s = s.ToLower();
+
             if (!Regex.IsMatch(s, @"^[sdch][\dajqk]$"))
                 throw new ArgumentException("Invalid input.");
 
