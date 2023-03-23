@@ -38,6 +38,23 @@ namespace Solitaire
         }
 
         /// <summary>
+        /// Two cards are considered equal if they have the same suit.
+        /// and value.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>True if the cards are equal.</returns>
+        public override bool Equals(object? obj)
+        {
+            if (obj == null) return false;
+            if (!(obj is Card)) return false;
+
+            if (((Card)obj).suit != this.suit) return false;
+            if (((Card)obj).value != this.value) return false;
+
+            return true;
+        }
+
+        /// <summary>
         /// If the card is a Spade or a Club.
         /// </summary>
         /// <returns>True if the card is black.</returns>
@@ -99,7 +116,7 @@ namespace Solitaire
                     value = 13;
                     break;
                 default:
-                    value = int.Parse($"{s}");
+                    value = int.Parse($"{s[1]}");
                     break;
             }
 
