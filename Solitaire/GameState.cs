@@ -288,6 +288,7 @@
 
             Card card = Board[pile].Last();
             CardsInPlay.Remove(card);
+            Board[pile].Remove(card);
 
             if (Board[pile].Count == 0 && FaceDownCardsInBoard[pile] > 0)
                 RevealBoardCard(pile, requestCard);
