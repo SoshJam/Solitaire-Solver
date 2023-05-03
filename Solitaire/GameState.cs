@@ -77,7 +77,9 @@
             for (int i = 0; i < 7; i++)
             {
                 FaceDownCardsInBoard[i] = i;
-                Board[i] = new List<Card> { requestCard() };
+                Card card = requestCard();
+                Board[i] = new List<Card> { card };
+                CardsInPlay.Add(card);
             }
         }
 
@@ -106,12 +108,12 @@
         /// return true if drawnCard matches what we got off the linked list.
         /// </returns>
         /// <exception cref="InvalidOperationException">If the stock pile is empty.</exception>
-        public bool DrawStockPile(RequestCard request)
+        public bool DrawStockPile(RequestCard requestCard)
         {
             if (StockPile.Count == 0)
                 throw new InvalidOperationException("Stockpile is empty.");
 
-            Card drawnCard = request();
+            Card drawnCard = requestCard();
             Card newCard = StockPile.Pop();
             WastePile.Push(drawnCard);
 
@@ -183,11 +185,11 @@
         /// <param name="start">The pile the stack is in.</param>
         /// <param name="offset">The distance from the bottom of the stack to the bottom of its pile.</param>
         /// <param name="end">The pile the stack will end up in.</param>
-        /// <param name="request">A function to get a new card if the move would reveal one.</param>
+        /// <param name="requestCard">A function to get a new card if the move would reveal one.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if the card cannot be moved for whatever reason.
         /// </exception>
-        public void MoveCards(int start, int offset, int end, RequestCard request)
+        public void MoveCards(int start, int offset, int end, RequestCard requestCard)
         {
             // Ensure the move is valid
 
@@ -229,7 +231,7 @@
             // Flip over a face-down card if necessary
 
             if (offset == 0)
-                RevealBoardCard(start, request);
+                RevealBoardCard(start, requestCard);
         }
 
         /// <summary>
@@ -241,12 +243,12 @@
         /// <exception cref="InvalidOperationException">
         /// Thrown if there are any face-up cards in that pile.
         /// </exception>
-        public bool RevealBoardCard(int pile, RequestCard request)
+        public bool RevealBoardCard(int pile, RequestCard requestCard)
         {
             if (Board[pile].Count > 0)
                 throw new InvalidOperationException("Pile is not empty.");
 
-            Card card = request();
+            Card card = requestCard();
             bool seen = CardsInPlay.Contains(card) || CardsInStock.Contains(card);
             CardsInPlay.Add(card);
             Board[pile].Add(card);
