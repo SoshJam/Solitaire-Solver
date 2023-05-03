@@ -279,13 +279,18 @@
         /// Removes the top card of a pile on the board
         /// </summary>
         /// <param name="pile">The pile to take the card from</param>
-        public Card RemoveFromBoard(int pile)
+        /// <param name="requestCard">If a card needs to be revealed, get that card.</param>
+        /// <returns>The card that was removed.</returns>
+        public Card RemoveFromBoard(int pile, RequestCard requestCard)
         {
             if (Board[pile].Count == 0)
                 throw new InvalidOperationException("Pile is empty.");
 
             Card card = Board[pile].Last();
             CardsInPlay.Remove(card);
+
+            if (Board[pile].Count == 0 && FaceDownCardsInBoard[pile] > 0)
+                RevealBoardCard(pile, requestCard);
 
             return card;
         }
