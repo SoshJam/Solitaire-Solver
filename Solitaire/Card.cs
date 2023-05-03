@@ -57,20 +57,7 @@ namespace Solitaire
         }
 
         /// <summary>
-<<<<<<< HEAD
         /// Converts the card to an integer hash code.
-=======
-        /// Converts the string to a hash code.
-        /// </summary>
-        /// <returns>The hash code.</returns>
-        public override int GetHashCode()
-        {
-            return suit.GetHashCode() * value.GetHashCode();
-        }
-
-        /// <summary>
-        /// If the card is a Spade or a Club.
->>>>>>> 2593437f10ed4861e7611d170b762c372d1601ab
         /// </summary>
         /// <returns>The card converted to a hash code.</returns>
         public override int GetHashCode()
