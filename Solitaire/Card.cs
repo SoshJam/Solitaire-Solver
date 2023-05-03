@@ -57,6 +57,15 @@ namespace Solitaire
         }
 
         /// <summary>
+        /// Converts the card to an integer hash code.
+        /// </summary>
+        /// <returns>The card converted to a hash code.</returns>
+        public override int GetHashCode()
+        {
+            return suit.GetHashCode() ^ value;
+        }
+
+        /// <summary>
         /// Creates a card from a string. The string must be two characters long,
         /// with the first representing the suit and the second represents the 
         /// value. Value will be 1-9, or 0 representing a 10, a representing an
