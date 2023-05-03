@@ -161,6 +161,23 @@
         }
 
         /// <summary>
+        /// Removes a card from the top of a foundation pile
+        /// </summary>
+        /// <param name="card"></param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the card cannot be added to this pile.
+        /// </exception>
+        public Card RemoveFromFoundation(Suit suit)
+        {
+            if (FoundationPile[suit] == 0)
+                throw new InvalidOperationException("This pile is empty.");
+
+            Card card = new Card(suit, FoundationPile[suit]--);
+            CardsInPlay.Remove(card);
+            return card;
+        }
+
+        /// <summary>
         /// Moves a stack of cards from one pile to another.
         /// </summary>
         /// <param name="start">The pile the stack is in.</param>
@@ -199,7 +216,7 @@
                 movingCards.Add(Board[start][i]);
 
             if (movingCards[0] != bottom)
-                throw new ArgumentException("Something went wrong counting cards.");
+                throw new InvalidOperationException("Something went wrong counting cards.");
 
             // Add all cards to the new pile and remove from the old
 
@@ -235,6 +252,40 @@
             Board[pile].Add(card);
 
             return !seen;
+        }
+
+        /// <summary>
+        /// Adds the card to the board
+        /// </summary>
+        /// <param name="pile">The pile to add the card into</param>
+        public void AddToBoard(int pile, Card card)
+        {
+            if (Board[pile].Count == 0 && card.value != 13)
+                throw new InvalidOperationException("This card cannot be added to an empty stack.");
+
+            if (Board[pile].Last().IsBlack() != card.IsBlack())
+                throw new InvalidOperationException("Cards must alternate color.");
+
+            if (Board[pile].Last().value - 1 != card.value)
+                throw new InvalidOperationException("Card value must decrease.");
+
+            Board[pile].Add(card);
+            CardsInPlay.Add(card);
+        }
+
+        /// <summary>
+        /// Removes the top card of a pile on the board
+        /// </summary>
+        /// <param name="pile">The pile to take the card from</param>
+        public Card RemoveFromBoard(int pile)
+        {
+            if (Board[pile].Count == 0)
+                throw new InvalidOperationException("Pile is empty.");
+
+            Card card = Board[pile].Last();
+            CardsInPlay.Remove(card);
+
+            return card;
         }
 
         /// <summary>
