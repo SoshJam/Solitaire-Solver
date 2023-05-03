@@ -203,7 +203,7 @@
 
             Card top = Board[end].Last();
 
-            if (top.IsBlack() == bottom.IsBlack())
+            if (top.IsBlack == bottom.IsBlack)
                 throw new ArgumentException("Cards must alternate color.");
 
             if (top.value - 1 != bottom.value)
@@ -263,7 +263,7 @@
             if (Board[pile].Count == 0 && card.value != 13)
                 throw new InvalidOperationException("This card cannot be added to an empty stack.");
 
-            if (Board[pile].Last().IsBlack() != card.IsBlack())
+            if (Board[pile].Last().IsBlack != card.IsBlack)
                 throw new InvalidOperationException("Cards must alternate color.");
 
             if (Board[pile].Last().value - 1 != card.value)

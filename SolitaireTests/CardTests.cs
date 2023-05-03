@@ -68,10 +68,10 @@ namespace SolitaireTests
         [TestMethod]
         public void TestIsBlack()
         {
-            Assert.IsTrue(new Card(Suit.Spades, 1).IsBlack());
-            Assert.IsTrue(new Card(Suit.Clubs, 1).IsBlack());
-            Assert.IsFalse(new Card(Suit.Diamonds, 1).IsBlack());
-            Assert.IsFalse(new Card(Suit.Hearts, 1).IsBlack());
+            Assert.IsTrue(new Card(Suit.Spades, 1).IsBlack);
+            Assert.IsTrue(new Card(Suit.Clubs, 1).IsBlack);
+            Assert.IsFalse(new Card(Suit.Diamonds, 1).IsBlack);
+            Assert.IsFalse(new Card(Suit.Hearts, 1).IsBlack);
         }
 
         [TestMethod]

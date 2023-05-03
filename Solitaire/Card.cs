@@ -7,6 +7,8 @@ namespace Solitaire
         public readonly Suit suit;
         public readonly int value;
 
+        public bool IsBlack { get { return suit == Suit.Spades || suit == Suit.Clubs; } }
+
         public Card(Suit suit, int value)
         {
             this.suit = suit;
@@ -52,15 +54,6 @@ namespace Solitaire
             if (((Card)obj).value != this.value) return false;
 
             return true;
-        }
-
-        /// <summary>
-        /// If the card is a Spade or a Club.
-        /// </summary>
-        /// <returns>True if the card is black.</returns>
-        public bool IsBlack()
-        {
-            return suit == Suit.Spades || suit == Suit.Clubs;
         }
 
         /// <summary>
