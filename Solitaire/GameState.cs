@@ -243,15 +243,20 @@
         /// <exception cref="InvalidOperationException">
         /// Thrown if there are any face-up cards in that pile.
         /// </exception>
-        public bool RevealBoardCard(int pile, RequestCard requestCard)
+        private bool RevealBoardCard(int pile, RequestCard requestCard)
         {
             if (Board[pile].Count > 0)
                 throw new InvalidOperationException("Pile is not empty.");
+
+            if (FaceDownCardsInBoard[pile] == 0)
+                throw new InvalidOperationException("No cards to reveal.");
 
             Card card = requestCard();
             bool seen = CardsInPlay.Contains(card) || CardsInStock.Contains(card);
             CardsInPlay.Add(card);
             Board[pile].Add(card);
+
+            FaceDownCardsInBoard[pile]--;
 
             return !seen;
         }
@@ -265,10 +270,10 @@
             if (Board[pile].Count == 0 && card.value != 13)
                 throw new InvalidOperationException("This card cannot be added to an empty stack.");
 
-            if (Board[pile].Last().IsBlack == card.IsBlack)
+            if (Board[pile].Count > 0 && Board[pile].Last().IsBlack == card.IsBlack)
                 throw new InvalidOperationException("Cards must alternate color.");
 
-            if (Board[pile].Last().value - 1 != card.value)
+            if (Board[pile].Count > 0 && Board[pile].Last().value - 1 != card.value)
                 throw new InvalidOperationException("Card value must decrease.");
 
             Board[pile].Add(card);
