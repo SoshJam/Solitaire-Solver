@@ -129,8 +129,8 @@ namespace Solitaire
     public enum Suit
     {
         Spades,
-        Diamonds,
+        Hearts,
         Clubs,
-        Hearts
+        Diamonds
     }
 }
