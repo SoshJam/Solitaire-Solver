@@ -52,6 +52,8 @@ namespace SolitaireTests
             Assert.AreEqual("A♠", CharCard.ToString('A'));
             Assert.AreEqual("2♣", CharCard.ToString('O'));
             Assert.AreEqual("T♥", CharCard.ToString('j'));
+            Assert.AreEqual("J♦", CharCard.ToString('x'));
+            Assert.AreEqual("Q♦", CharCard.ToString('y'));
             Assert.AreEqual("K♦", CharCard.ToString('z'));
         }
 
