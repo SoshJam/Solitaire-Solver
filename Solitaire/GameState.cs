@@ -70,8 +70,8 @@
             FoundationPile = new Dictionary<Suit, int>();
             FoundationPile[Suit.Spades] = 0;
             FoundationPile[Suit.Hearts] = 0;
-            FoundationPile[Suit.Spades] = 0;
-            FoundationPile[Suit.Spades] = 0;
+            FoundationPile[Suit.Clubs] = 0;
+            FoundationPile[Suit.Diamonds] = 0;
 
             // Set up the game board with 0-6 facedown cards in each pile and one face-up card on top
             for (int i = 0; i < 7; i++)
