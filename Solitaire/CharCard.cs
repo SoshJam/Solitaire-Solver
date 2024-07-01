@@ -55,14 +55,14 @@ namespace Solitaire
             if (input.Length != 2)
                 throw new ArgumentException("Input string must have length 2.");
 
-            char rankChar = string[0];
-            char suitChar = string[1];
+            char rankChar = input[0];
+            char suitChar = input[1];
 
             // Throw an error if the string is not correct
             char[] validRankChars = "A23456789TJQK".ToCharArray();
             char[] validSuitChars = "♠♥♣♦".ToCharArray();
 
-            if (validRankChars.Contains(rankChar) && validSuitChars.Contains(suitChar))
+            if (!validRankChars.Contains(rankChar) || !validSuitChars.Contains(suitChar))
                 throw new ArgumentException("Input string was not formatted correctly.");
 
             // Find the char to start the suit
@@ -98,11 +98,18 @@ namespace Solitaire
         /// </summary>
         /// <param name="input">The card to check.</param>
         /// <returns>The name of the card.</returns>
+        /// <exception cref="ArgumentException">If the char is not a letter</exception>
         public static string ToString(char input)
         {
+            // Make sure the card is in the valid range
+            if (!(input >= 'A' && input <= 'Z') && !(input >= 'a' && input <= 'z'))
+                throw new ArgumentException("Input char must be a letter");
+
+            // Get the suit and value of the card
             Suit suit = GetSuit(input);
             int value = GetValue(input);
 
+            // Convert value into rank
             string card = "";
             switch (value)
             {
@@ -126,6 +133,7 @@ namespace Solitaire
                     break;
             }
 
+            // Add the suit
             card += "♠♥♣♦"[(int)suit];
 
             return card;
