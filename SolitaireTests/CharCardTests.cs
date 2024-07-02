@@ -25,6 +25,22 @@ namespace SolitaireTests
         }
 
         [TestMethod]
+        public void TestFromSuitAndValue()
+        {
+            Assert.AreEqual('A', CharCard.FromSuitAndValue(Suit.Spades, 1));
+            Assert.AreEqual('O', CharCard.FromSuitAndValue(Suit.Clubs, 2));
+            Assert.AreEqual('j', CharCard.FromSuitAndValue(Suit.Hearts, 10));
+            Assert.AreEqual('z', CharCard.FromSuitAndValue(Suit.Diamonds, 13));
+        }
+
+        [TestMethod]
+        public void TestFromSuitAndValueInvalidValue()
+        {
+            Assert.ThrowsException<ArgumentException>(() => CharCard.FromSuitAndValue(Suit.Spades, 0));
+            Assert.ThrowsException<ArgumentException>(() => CharCard.FromSuitAndValue(Suit.Spades, 14));
+        }
+
+        [TestMethod]
         public void TestFromString()
         {
             Assert.AreEqual('A', CharCard.FromString("A♠"));

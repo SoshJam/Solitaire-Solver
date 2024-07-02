@@ -44,6 +44,41 @@ namespace Solitaire
         }
 
         /// <summary>
+        /// Creates a char representing a card from a suit and value.
+        /// </summary>
+        /// <param name="suit">The suit of a card.</param>
+        /// <param name="value">The value of a card.</param>
+        /// <returns>The char representing this char.</returns>
+        /// <exception cref="ArgumentException">If the value is outisde the valid range.</exception>
+        public static char FromSuitAndValue(Suit suit, int value)
+        {
+            // Make sure value is between 1 and 13
+            if (value < 1 || value > 13)
+                throw new ArgumentException("Value must be between 1 and 13.");
+
+            // Find the char to start the suit
+            char suitStart = '\0';
+            switch (suit)
+            {
+                case Suit.Spades:
+                default:
+                    suitStart = 'A';
+                    break;
+                case Suit.Clubs:
+                    suitStart = 'N';
+                    break;
+                case Suit.Hearts:
+                    suitStart = 'a';
+                    break;
+                case Suit.Diamonds:
+                    suitStart = 'n';
+                    break;
+            }
+
+            return (char)(suitStart + value - 1);
+        }
+
+        /// <summary>
         /// Converts an input string into a char representing a card.
         /// </summary>
         /// <param name="input">A two-character string representing a card.</param>
