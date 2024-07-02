@@ -1,4 +1,6 @@
-﻿namespace Solitaire
+﻿using System.Linq;
+
+namespace Solitaire
 {
     public class GameState
     {
@@ -6,25 +8,25 @@
         /// The cards that are known to be face-up and in play, either on the
         /// board or in the foundation piles.
         /// </summary>
-        public readonly HashSet<Card> CardsInPlay;
+        public readonly HashSet<char> CardsInPlay;
 
         /// <summary>
         /// The cards that are known to be in either the stock pile or the waste
         /// pile
         /// </summary>
-        public readonly HashSet<Card> CardsInStock;
+        public readonly HashSet<char> CardsInStock;
 
         /// <summary>
-        /// The facedown cards in the Stock Pile. If a card is null it means
+        /// The facedown cards in the Stock Pile. If a card is \0 it means
         /// we have not been through the pile yet.
         /// </summary>
-        public readonly Stack<Card> StockPile;
+        public readonly Stack<char> StockPile;
 
         /// <summary>
         /// The faceup cards in the Waste Pile. When the StockPile is empty
         /// and reset, everything gets popped from this and pushed to the StockPile.
         /// </summary>
-        public readonly Stack<Card> WastePile;
+        public readonly Stack<char> WastePile;
 
         private bool stockSeen; // If we have seen everything in the stockpile
 
@@ -33,7 +35,7 @@
         /// 
         /// These have to be lists because we can move any part of a stack.
         /// </summary>
-        public readonly List<Card>[] Board;
+        public readonly List<char>[] Board;
 
         /// <summary>
         /// The face-down cards on the board. There are 0-6 in each pile at the
@@ -52,7 +54,8 @@
         /// and revealing cards from the game board.
         /// </summary>
         /// <returns>The card that was drawn.</returns>
-        public delegate Card RequestCard();
+        public delegate char RequestCard();
+
 
         /// <summary>
         /// Tracks a new solitaire game.
@@ -60,13 +63,15 @@
         /// <param name="requestCard">A function to get the seven cards that will be face-up at the start of the game.</param>
         public GameState(RequestCard requestCard)
         {
-            CardsInPlay = new HashSet<Card>();
-            CardsInStock = new HashSet<Card>();
-            StockPile = new Stack<Card>();
-            WastePile = new Stack<Card>();
-            Board = new List<Card>[7];
+            // Set up the various piles
+            CardsInPlay = new HashSet<char>();
+            CardsInStock = new HashSet<char>();
+            StockPile = new Stack<char>();
+            WastePile = new Stack<char>();
+            Board = new List<char>[7];
             FaceDownCardsInBoard = new int[7];
 
+            // Set up the Foundation piles
             FoundationPile = new Dictionary<Suit, int>();
             FoundationPile[Suit.Spades] = 0;
             FoundationPile[Suit.Hearts] = 0;
@@ -77,8 +82,8 @@
             for (int i = 0; i < 7; i++)
             {
                 FaceDownCardsInBoard[i] = i;
-                Card card = requestCard();
-                Board[i] = new List<Card> { card };
+                char card = requestCard();
+                Board[i] = new List<char> { card };
                 CardsInPlay.Add(card);
             }
         }
@@ -102,10 +107,10 @@
         /// <summary>
         /// Pulls a card from the stock pile and places it in the waste pile.
         /// </summary>
-        /// <param name="drawnCard">The card that was drawn.</param>
+        /// <param name="requestCard">Delegate to draw a card from the stock pile.</param>
         /// <returns>
         /// If we haven't seen the whole stock pile, return true. If we have,
-        /// return true if drawnCard matches what we got off the linked list.
+        /// return true if drawnCard matches what we got off the stack.
         /// </returns>
         /// <exception cref="InvalidOperationException">If the stock pile is empty.</exception>
         public bool DrawStockPile(RequestCard requestCard)
@@ -113,19 +118,24 @@
             if (StockPile.Count == 0)
                 throw new InvalidOperationException("Stockpile is empty.");
 
-            Card drawnCard = requestCard();
-            Card newCard = StockPile.Pop();
+            char drawnCard = requestCard();
+            char newCard = StockPile.Pop();
             WastePile.Push(drawnCard);
 
-            return !stockSeen || drawnCard.Equals(newCard);
+            return !stockSeen && drawnCard.Equals(newCard);
         }
 
-        public Card RemoveFromWastePile()
+        /// <summary>
+        /// Removes a card from the waste pile.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">If the waste pile is empty.</exception>
+        public char RemoveFromWastePile()
         {
             if (WastePile.Count == 0)
                 throw new InvalidOperationException("Waste pile is empty");
 
-            Card card = WastePile.Pop();
+            char card = WastePile.Pop();
             CardsInStock.Remove(card);
 
             return card;
@@ -146,16 +156,16 @@
         /// <summary>
         /// Adds a card to the top of its requested foundation pile.
         /// </summary>
-        /// <param name="card"></param>
+        /// <param name="card">The card to add</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if the card cannot be added to this pile.
         /// </exception>
-        public void AddToFoundation(Card card)
+        public void AddToFoundation(char card)
         {
-            int top = FoundationPile[card.suit];
+            int top = FoundationPile[Card.GetSuit(card)];
 
-            if (top + 1 == card.value)
-                FoundationPile[card.suit] = card.value;
+            if (top + 1 == Card.GetValue(card))
+                FoundationPile[Card.GetSuit(card)] = Card.GetValue(card);
             else
                 throw new InvalidOperationException("Cannot add this card to the pile.");
 
@@ -165,16 +175,16 @@
         /// <summary>
         /// Removes a card from the top of a foundation pile
         /// </summary>
-        /// <param name="card"></param>
+        /// <param name="suit">The suit of the foundation pile to remove</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if the card cannot be added to this pile.
+        /// Thrown if the card cannot be removed from this pile.
         /// </exception>
-        public Card RemoveFromFoundation(Suit suit)
+        public char RemoveFromFoundation(Suit suit)
         {
             if (FoundationPile[suit] == 0)
                 throw new InvalidOperationException("This pile is empty.");
 
-            Card card = new Card(suit, FoundationPile[suit]--);
+            char card = Card.FromSuitAndValue(suit, FoundationPile[suit]--);
             CardsInPlay.Remove(card);
             return card;
         }
@@ -198,22 +208,22 @@
             if (Board[start].Count < offset)
                 throw new ArgumentException($"Start pile has less than {offset} cards.");
 
-            Card bottom = Board[start][offset];
+            char bottom = Board[start][offset];
 
-            if (Board[end].Count == 0 && (bottom.value != 13 || FaceDownCardsInBoard[end] != 0))
+            if (Board[end].Count == 0 && (Card.GetValue(bottom) != 13 || FaceDownCardsInBoard[end] != 0))
                 throw new ArgumentException("Target pile is not empty, or the moving card is not a king.");
 
-            Card top = Board[end].Last();
+            char top = Board[end].Last();
 
-            if (top.IsBlack == bottom.IsBlack)
+            if (Card.IsBlack(top) == Card.IsBlack(bottom))
                 throw new ArgumentException("Cards must alternate color.");
 
-            if (top.value - 1 != bottom.value)
+            if (Card.GetValue(top) - 1 != Card.GetValue(bottom))
                 throw new ArgumentException("Card value must decrease.");
 
             // Get a list of the cards that will be moved
 
-            List<Card> movingCards = new List<Card>();
+            List<char> movingCards = new List<char>();
             for (int i = offset; i < Board[start].Count; i++)
                 movingCards.Add(Board[start][i]);
 
@@ -222,7 +232,7 @@
 
             // Add all cards to the new pile and remove from the old
 
-            foreach (Card c in movingCards)
+            foreach (char c in movingCards)
             {
                 Board[start].Remove(c);
                 Board[end].Add(c);
@@ -237,8 +247,8 @@
         /// <summary>
         /// Reveal a card atop a pile in the board.
         /// </summary>
-        /// <param name="pile">The pile </param>
-        /// <param name="card"></param>
+        /// <param name="pile">The pile to reveal a card from</param>
+        /// <param name="requestCard">Delegate to get a card</param>
         /// <returns>true if the card was not already seen in the game.</returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown if there are any face-up cards in that pile.
@@ -251,7 +261,7 @@
             if (FaceDownCardsInBoard[pile] == 0)
                 throw new InvalidOperationException("No cards to reveal.");
 
-            Card card = requestCard();
+            char card = requestCard();
             bool seen = CardsInPlay.Contains(card) || CardsInStock.Contains(card);
             CardsInPlay.Add(card);
             Board[pile].Add(card);
@@ -265,15 +275,16 @@
         /// Adds the card to the board
         /// </summary>
         /// <param name="pile">The pile to add the card into</param>
-        public void AddToBoard(int pile, Card card)
+        /// <param name="card">The card to add</param>
+        public void AddToBoard(int pile, char card)
         {
-            if (Board[pile].Count == 0 && card.value != 13)
+            if (Board[pile].Count == 0 && Card.GetValue(card) != 13)
                 throw new InvalidOperationException("This card cannot be added to an empty stack.");
 
-            if (Board[pile].Count > 0 && Board[pile].Last().IsBlack == card.IsBlack)
+            if (Board[pile].Count > 0 && Card.IsBlack(Board[pile].Last()) == Card.IsBlack(card))
                 throw new InvalidOperationException("Cards must alternate color.");
 
-            if (Board[pile].Count > 0 && Board[pile].Last().value - 1 != card.value)
+            if (Board[pile].Count > 0 && Card.GetValue(Board[pile].Last()) - 1 != Card.GetValue(card))
                 throw new InvalidOperationException("Card value must decrease.");
 
             Board[pile].Add(card);
@@ -286,12 +297,12 @@
         /// <param name="pile">The pile to take the card from</param>
         /// <param name="requestCard">If a card needs to be revealed, get that card.</param>
         /// <returns>The card that was removed.</returns>
-        public Card RemoveFromBoard(int pile, RequestCard requestCard)
+        public char RemoveFromBoard(int pile, RequestCard requestCard)
         {
             if (Board[pile].Count == 0)
                 throw new InvalidOperationException("Pile is empty.");
 
-            Card card = Board[pile].Last();
+            char card = Board[pile].Last();
             CardsInPlay.Remove(card);
             Board[pile].Remove(card);
 
@@ -306,9 +317,9 @@
         /// </summary>
         /// <remarks>Useful when calculating moves.</remarks>
         /// <returns>An array of 7 cards.</returns>
-        public Card[] GetBoardPileTops()
+        public char[] GetBoardPileTops()
         {
-            Card[] tops = new Card[7];
+            char[] tops = new char[7];
             for (int i = 0; i < 7; i++)
             {
                 tops[i] = Board[i].Last();
@@ -321,9 +332,9 @@
         /// </summary>
         /// <remarks>Useful when calculating moves.</remarks>
         /// <returns>An array of 7 cards.</returns>
-        public Card[] GetBoardPileBottoms()
+        public char[] GetBoardPileBottoms()
         {
-            Card[] bottoms = new Card[7];
+            char[] bottoms = new char[7];
             for (int i = 0; i < 7; i++)
             {
                 bottoms[i] = Board[i].First();

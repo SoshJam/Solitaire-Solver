@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Solitaire;
 
 namespace SolitaireTests
@@ -7,99 +7,88 @@ namespace SolitaireTests
     public class CardTests
     {
         [TestMethod]
-        public void TestConstructor()
+        public void TestGetSuit()
         {
-            Card card1 = new Card(Suit.Spades, 1);
-
-            Assert.AreEqual(Suit.Spades, card1.suit);
-            Assert.AreEqual(1, card1.value);
-
-            Card card2 = new Card(Suit.Hearts, 12);
-
-            Assert.AreEqual(Suit.Hearts, card2.suit);
-            Assert.AreEqual(12, card2.value);
+            Assert.AreEqual(Suit.Spades, Card.GetSuit('A'));
+            Assert.AreEqual(Suit.Clubs, Card.GetSuit('N'));
+            Assert.AreEqual(Suit.Hearts, Card.GetSuit('a'));
+            Assert.AreEqual(Suit.Diamonds, Card.GetSuit('n'));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void TestConstructorInvalidValueMin()
+        public void TestGetValue()
         {
-            new Card(Suit.Spades, 0);
+            Assert.AreEqual(1, Card.GetValue('A'));
+            Assert.AreEqual(2, Card.GetValue('O'));
+            Assert.AreEqual(10, Card.GetValue('j'));
+            Assert.AreEqual(13, Card.GetValue('z'));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void TestConstructorInvalidValueMax()
+        public void TestFromSuitAndValue()
         {
-            new Card(Suit.Spades, 14);
+            Assert.AreEqual('A', Card.FromSuitAndValue(Suit.Spades, 1));
+            Assert.AreEqual('O', Card.FromSuitAndValue(Suit.Clubs, 2));
+            Assert.AreEqual('j', Card.FromSuitAndValue(Suit.Hearts, 10));
+            Assert.AreEqual('z', Card.FromSuitAndValue(Suit.Diamonds, 13));
+        }
+
+        [TestMethod]
+        public void TestFromSuitAndValueInvalidValue()
+        {
+            Assert.ThrowsException<ArgumentException>(() => Card.FromSuitAndValue(Suit.Spades, 0));
+            Assert.ThrowsException<ArgumentException>(() => Card.FromSuitAndValue(Suit.Spades, 14));
+        }
+
+        [TestMethod]
+        public void TestFromString()
+        {
+            Assert.AreEqual('A', Card.FromString("A♠"));
+            Assert.AreEqual('O', Card.FromString("2♣"));
+            Assert.AreEqual('j', Card.FromString("T♥"));
+            Assert.AreEqual('z', Card.FromString("K♦"));
+        }
+
+        [TestMethod]
+        public void TestFromStringInvalidLength()
+        {
+            Assert.ThrowsException<ArgumentException>(() => Card.FromString("1"));
+            Assert.ThrowsException<ArgumentException>(() => Card.FromString("123"));
+        }
+
+        [TestMethod]
+        public void TestFromStringInvalidFormat()
+        {
+            Assert.ThrowsException<ArgumentException>(() => Card.FromString("♠A"));
         }
 
         [TestMethod]
         public void TestToString()
         {
-            Assert.AreEqual("3 of Clubs", new Card(Suit.Clubs, 3).ToString());
-            Assert.AreEqual("10 of Diamonds", new Card(Suit.Diamonds, 10).ToString());
-
-            Assert.AreEqual("Ace of Spades", new Card(Suit.Spades, 1).ToString());
-            Assert.AreEqual("Jack of Diamonds", new Card(Suit.Diamonds, 11).ToString());
-            Assert.AreEqual("Queen of Clubs", new Card(Suit.Clubs, 12).ToString());
-            Assert.AreEqual("King of Hearts", new Card(Suit.Hearts, 13).ToString());
+            Assert.AreEqual("A♠", Card.ToString('A'));
+            Assert.AreEqual("2♣", Card.ToString('O'));
+            Assert.AreEqual("T♥", Card.ToString('j'));
+            Assert.AreEqual("J♦", Card.ToString('x'));
+            Assert.AreEqual("Q♦", Card.ToString('y'));
+            Assert.AreEqual("K♦", Card.ToString('z'));
         }
 
         [TestMethod]
-        public void TestEquals()
+        public void TestToStringInvalid()
         {
-            Card card = new Card(Suit.Spades, 1);                   // Is this your card?
-
-            Assert.IsFalse(card.Equals(null));                      // Null
-            Assert.IsFalse(card.Equals(0));                         // Primitive type
-            Assert.IsFalse(card.Equals(new LinkedList<string>()));  // Reference type
-            Assert.IsFalse(card.Equals(new Card(Suit.Clubs, 13)));  // Wrong card
-            Assert.IsFalse(card.Equals(new Card(Suit.Spades, 13))); // Right suit, wrong value
-            Assert.IsFalse(card.Equals(new Card(Suit.Clubs, 1)));   // Right value, wrong suit
-            Assert.IsFalse(card.Equals(Card.FromString("ck")));     // Wrong card, but from string
-            Assert.IsFalse(card.Equals(Card.FromString("sk")));     // Right suit, wrong value
-            Assert.IsFalse(card.Equals(Card.FromString("c1")));     // Wrong suit, right value
-
-            Assert.IsTrue(card.Equals(new Card(Suit.Spades, 1)));   // Right card
-            Assert.IsTrue(card.Equals(Card.FromString("s1")));      // Right card, from string
+            Assert.ThrowsException<ArgumentException>(() => Card.ToString((char)64));
+            Assert.ThrowsException<ArgumentException>(() => Card.ToString((char)91));
+            Assert.ThrowsException<ArgumentException>(() => Card.ToString((char)123));
         }
 
         [TestMethod]
         public void TestIsBlack()
         {
-            Assert.IsTrue(new Card(Suit.Spades, 1).IsBlack);
-            Assert.IsTrue(new Card(Suit.Clubs, 1).IsBlack);
-            Assert.IsFalse(new Card(Suit.Diamonds, 1).IsBlack);
-            Assert.IsFalse(new Card(Suit.Hearts, 1).IsBlack);
-        }
+            Assert.IsTrue(Card.IsBlack('A'));
+            Assert.IsTrue(Card.IsBlack('N'));
 
-        [TestMethod]
-        public void TestCardFromString()
-        {
-            Assert.AreEqual(new Card(Suit.Diamonds, 2), Card.FromString("d2"));
-            Assert.AreEqual(new Card(Suit.Clubs, 3), Card.FromString("C3"));
-            Assert.AreEqual(new Card(Suit.Hearts, 9), Card.FromString("h9"));
-
-            Assert.AreEqual(new Card(Suit.Spades, 1), Card.FromString("s1"));
-            Assert.AreEqual(new Card(Suit.Diamonds, 10), Card.FromString("d0"));
-            Assert.AreEqual(new Card(Suit.Clubs, 11), Card.FromString("Cj"));
-            Assert.AreEqual(new Card(Suit.Hearts, 12), Card.FromString("hQ"));
-            Assert.AreEqual(new Card(Suit.Spades, 13), Card.FromString("SK"));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void TestCardFromStringTooLong()
-        {
-            Card.FromString("s1 <- This would be an Ace of Spades if the string wasn't so long.");
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void TestCardFromStringWrongFormat()
-        {
-            Card.FromString("3d");
+            Assert.IsFalse(Card.IsBlack('a'));
+            Assert.IsFalse(Card.IsBlack('n'));
         }
     }
 }

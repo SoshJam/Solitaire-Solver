@@ -9,7 +9,7 @@ namespace Solitaire
     /// (Normally it goes Spades - Hearts - Clubs - Diamonds, but this order makes certain operations easier.)
     /// This static class provides methods for interpreting characters as cards.
     /// </summary>
-    public static class CharCard
+    public static class Card
     {
         /// <summary>
         /// Returns the Suit of the card.
@@ -183,5 +183,13 @@ namespace Solitaire
         {
             return input <= 'Z';
         }
+    }
+
+    public enum Suit
+    {
+        Spades,
+        Hearts,
+        Clubs,
+        Diamonds
     }
 }
