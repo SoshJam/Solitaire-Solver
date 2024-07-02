@@ -1,4 +1,6 @@
-﻿namespace Solitaire
+﻿using System.Linq;
+
+namespace Solitaire
 {
     class CharGameState
     {
@@ -149,6 +151,195 @@
             int redMinimum = Math.Min(FoundationPile[Suit.Diamonds], FoundationPile[Suit.Hearts]);
 
             return Math.Min(blackMinimum, redMinimum);
+        }
+
+        /// <summary>
+        /// Adds a card to the top of its requested foundation pile.
+        /// </summary>
+        /// <param name="card">The card to add</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the card cannot be added to this pile.
+        /// </exception>
+        public void AddToFoundation(char card)
+        {
+            int top = FoundationPile[CharCard.GetSuit(card)];
+
+            if (top + 1 == CharCard.GetValue(card))
+                FoundationPile[CharCard.GetSuit(card)] = CharCard.GetValue(card);
+            else
+                throw new InvalidOperationException("Cannot add this card to the pile.");
+
+            CardsInPlay.Add(card);
+        }
+
+        /// <summary>
+        /// Removes a card from the top of a foundation pile
+        /// </summary>
+        /// <param name="suit">The suit of the foundation pile to remove</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the card cannot be removed from this pile.
+        /// </exception>
+        public char RemoveFromFoundation(Suit suit)
+        {
+            if (FoundationPile[suit] == 0)
+                throw new InvalidOperationException("This pile is empty.");
+
+            char card = CharCard.FromSuitAndValue(suit, FoundationPile[suit]--);
+            CardsInPlay.Remove(card);
+            return card;
+        }
+
+        /// <summary>
+        /// Moves a stack of cards from one pile to another.
+        /// </summary>
+        /// <param name="start">The pile the stack is in.</param>
+        /// <param name="offset">The distance from the bottom of the stack to the bottom of its pile.</param>
+        /// <param name="end">The pile the stack will end up in.</param>
+        /// <param name="requestCard">A function to get a new card if the move would reveal one.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the card cannot be moved for whatever reason.
+        /// </exception>
+        public void MoveCards(int start, int offset, int end, RequestCard requestCard)
+        {
+            // Ensure the move is valid
+
+            if (Board[start].Count == 0)
+                throw new ArgumentException("Start pile has no cards.");
+            if (Board[start].Count < offset)
+                throw new ArgumentException($"Start pile has less than {offset} cards.");
+
+            char bottom = Board[start][offset];
+
+            if (Board[end].Count == 0 && (CharCard.GetValue(bottom) != 13 || FaceDownCardsInBoard[end] != 0))
+                throw new ArgumentException("Target pile is not empty, or the moving card is not a king.");
+
+            char top = Board[end].Last();
+
+            if (CharCard.IsBlack(top) == CharCard.IsBlack(bottom))
+                throw new ArgumentException("Cards must alternate color.");
+
+            if (CharCard.GetValue(top) - 1 != CharCard.GetValue(bottom))
+                throw new ArgumentException("Card value must decrease.");
+
+            // Get a list of the cards that will be moved
+
+            List<char> movingCards = new List<char>();
+            for (int i = offset; i < Board[start].Count; i++)
+                movingCards.Add(Board[start][i]);
+
+            if (movingCards[0] != bottom)
+                throw new InvalidOperationException("Something went wrong counting cards.");
+
+            // Add all cards to the new pile and remove from the old
+
+            foreach (char c in movingCards)
+            {
+                Board[start].Remove(c);
+                Board[end].Add(c);
+            }
+
+            // Flip over a face-down card if necessary
+
+            if (offset == 0)
+                RevealBoardCard(start, requestCard);
+        }
+
+        /// <summary>
+        /// Reveal a card atop a pile in the board.
+        /// </summary>
+        /// <param name="pile">The pile to reveal a card from</param>
+        /// <param name="requestCard">Delegate to get a card</param>
+        /// <returns>true if the card was not already seen in the game.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if there are any face-up cards in that pile.
+        /// </exception>
+        private bool RevealBoardCard(int pile, RequestCard requestCard)
+        {
+            if (Board[pile].Count > 0)
+                throw new InvalidOperationException("Pile is not empty.");
+
+            if (FaceDownCardsInBoard[pile] == 0)
+                throw new InvalidOperationException("No cards to reveal.");
+
+            char card = requestCard();
+            bool seen = CardsInPlay.Contains(card) || CardsInStock.Contains(card);
+            CardsInPlay.Add(card);
+            Board[pile].Add(card);
+
+            FaceDownCardsInBoard[pile]--;
+
+            return !seen;
+        }
+
+        /// <summary>
+        /// Adds the card to the board
+        /// </summary>
+        /// <param name="pile">The pile to add the card into</param>
+        /// <param name="card">The card to add</param>
+        public void AddToBoard(int pile, char card)
+        {
+            if (Board[pile].Count == 0 && CharCard.GetValue(card) != 13)
+                throw new InvalidOperationException("This card cannot be added to an empty stack.");
+
+            if (Board[pile].Count > 0 && CharCard.IsBlack(Board[pile].Last()) == CharCard.IsBlack(card))
+                throw new InvalidOperationException("Cards must alternate color.");
+
+            if (Board[pile].Count > 0 && CharCard.GetValue(Board[pile].Last()) - 1 != CharCard.GetValue(card))
+                throw new InvalidOperationException("Card value must decrease.");
+
+            Board[pile].Add(card);
+            CardsInPlay.Add(card);
+        }
+
+        /// <summary>
+        /// Removes the top card of a pile on the board
+        /// </summary>
+        /// <param name="pile">The pile to take the card from</param>
+        /// <param name="requestCard">If a card needs to be revealed, get that card.</param>
+        /// <returns>The card that was removed.</returns>
+        public char RemoveFromBoard(int pile, RequestCard requestCard)
+        {
+            if (Board[pile].Count == 0)
+                throw new InvalidOperationException("Pile is empty.");
+
+            char card = Board[pile].Last();
+            CardsInPlay.Remove(card);
+            Board[pile].Remove(card);
+
+            if (Board[pile].Count == 0 && FaceDownCardsInBoard[pile] > 0)
+                RevealBoardCard(pile, requestCard);
+
+            return card;
+        }
+
+        /// <summary>
+        /// Gets the top card of every pile of the board.
+        /// </summary>
+        /// <remarks>Useful when calculating moves.</remarks>
+        /// <returns>An array of 7 cards.</returns>
+        public char[] GetBoardPileTops()
+        {
+            char[] tops = new char[7];
+            for (int i = 0; i < 7; i++)
+            {
+                tops[i] = Board[i].Last();
+            }
+            return tops;
+        }
+
+        /// <summary>
+        /// Gets the lowest face-up card of every pile of the board.
+        /// </summary>
+        /// <remarks>Useful when calculating moves.</remarks>
+        /// <returns>An array of 7 cards.</returns>
+        public char[] GetBoardPileBottoms()
+        {
+            char[] bottoms = new char[7];
+            for (int i = 0; i < 7; i++)
+            {
+                bottoms[i] = Board[i].First();
+            }
+            return bottoms;
         }
     }
 }
