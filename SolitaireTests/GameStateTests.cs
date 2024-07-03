@@ -1,12 +1,13 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Solitaire;
 
 namespace SolitaireTests
 {
-    /*
     [TestClass]
     public class GameStateTests
     {
+        // Helper Methods
+
         /// <summary>
         /// Sets up a game state with spade cards from 1 to 7 on the board.
         /// </summary>
@@ -14,14 +15,14 @@ namespace SolitaireTests
         private GameState SetUpGameState()
         {
             // Creates a GameState with Spade cards for 1 to 7
-            int cardIndex = 1;
-            GameState gs = new GameState(() => Card.FromString($"s{cardIndex++}"));
+            int cardIndex = 0;
+            GameState gs = new GameState(() => (char)('A' + cardIndex++));
 
             return gs;
         }
 
         /// <summary>
-        /// Helper method. Checks if two IEnumerables are equal.
+        /// Helper method. Checks if two IEnumerables are equal, but not necessarily in order
         /// </summary>
         /// <typeparam name="T">The elements in the collections.</typeparam>
         /// <param name="expected">The expected collection contents.</param>
@@ -44,7 +45,7 @@ namespace SolitaireTests
         /// </summary>
         /// <param name="strings">The strings representing cards.</param>
         /// <returns>A collection of cards.</returns>
-        private IEnumerable<Card> CreateCardsFromStrings(IEnumerable<string> strings)
+        private IEnumerable<char> CreateCardsFromStrings(IEnumerable<string> strings)
         {
             foreach (string s in strings)
                 yield return Card.FromString(s);
@@ -61,11 +62,11 @@ namespace SolitaireTests
         {
             // Test from constructor
 
-            IEnumerable<Card> expectedBottoms = CreateCardsFromStrings(new List<string> {
-                    "sa", "s2", "s3","s4", "s5", "s6", "s7"
+            IEnumerable<char> expectedBottoms = CreateCardsFromStrings(new List<string> {
+                    "AS", "2S", "3S", "4S", "5S", "6S", "7S"
                 });
-            IEnumerable<Card> expectedTops = CreateCardsFromStrings(new List<string> {
-                    "sa", "s2", "s3","s4", "s5", "s6", "s7"
+            IEnumerable<char> expectedTops = CreateCardsFromStrings(new List<string> {
+                    "AS", "2S", "3S", "4S", "5S", "6S", "7S"
                 });
 
             GameState gs = SetUpGameState();
@@ -75,15 +76,15 @@ namespace SolitaireTests
 
             // Add cards to some piles and check
 
-            gs.AddToBoard(2, Card.FromString("d2"));
-            gs.AddToBoard(4, Card.FromString("h4"));
-            gs.AddToBoard(5, Card.FromString("h5"));
+            gs.AddToBoard(2, Card.FromString("2D"));
+            gs.AddToBoard(4, Card.FromString("4H"));
+            gs.AddToBoard(5, Card.FromString("5H"));
 
             expectedBottoms = CreateCardsFromStrings(new List<string> {
-                    "sa", "s2", "s3","s4", "s5", "s6", "s7"
+                    "AS", "2S", "3S", "4S", "5S", "6S", "7S"
                 });
             expectedTops = CreateCardsFromStrings(new List<string> {
-                    "sa", "s2", "d2", "s4", "h4", "h5", "s7"
+                    "AS", "2S", "2D", "4S", "4H", "5H", "7S"
                 });
 
             Assert.IsTrue(CheckCollections(expectedBottoms, gs.GetBoardPileBottoms()));
@@ -92,20 +93,20 @@ namespace SolitaireTests
             // Remove cards from pile
 
             Assert.AreEqual(
-                Card.FromString("s2"),
-                gs.RemoveFromBoard(1, () => Card.FromString("s8")));
+                Card.FromString("2S"),
+                gs.RemoveFromBoard(1, () => Card.FromString("8S")));
             Assert.AreEqual(
-                Card.FromString("h4"),
-                gs.RemoveFromBoard(4, () => Card.FromString("sa")));
+                Card.FromString("4H"),
+                gs.RemoveFromBoard(4, () => 'A'));
             Assert.AreEqual(
-                Card.FromString("h5"),
-                gs.RemoveFromBoard(5, () => Card.FromString("sa")));
+                Card.FromString("5H"),
+                gs.RemoveFromBoard(5, () => 'A'));
 
             expectedBottoms = CreateCardsFromStrings(new List<string> {
-                    "sa", "s8", "s3", "s4", "s5", "s6", "s7"
+                    "AS", "8S", "3S", "4S", "5S", "6S", "7S"
                 });
             expectedTops = CreateCardsFromStrings(new List<string> {
-                    "sa", "s8", "d2", "s4", "s5", "s6", "s7"
+                    "AS", "8S", "2D", "4S", "5S", "6S", "7S"
                 });
 
             Assert.IsTrue(CheckCollections(expectedBottoms, gs.GetBoardPileBottoms()));
@@ -202,5 +203,4 @@ namespace SolitaireTests
             SetUpGameState().AddToBoard(6, Card.FromString("h5"));
         }
     }
-    */
 }
