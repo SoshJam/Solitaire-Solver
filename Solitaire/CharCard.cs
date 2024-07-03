@@ -95,7 +95,7 @@ namespace Solitaire
 
             // Throw an error if the string is not correct
             char[] validRankChars = "A23456789TJQK".ToCharArray();
-            char[] validSuitChars = "♠♥♣♦".ToCharArray();
+            char[] validSuitChars = "♠♥♣♦SHCD".ToCharArray();
 
             if (!validRankChars.Contains(rankChar) || !validSuitChars.Contains(suitChar))
                 throw new ArgumentException("Input string was not formatted correctly.");
@@ -105,16 +105,20 @@ namespace Solitaire
             switch (suitChar)
             {
                 case '♠':
+                case 'S':
                 default:
                     suitStart = 'A';
                     break;
                 case '♣':
+                case 'C':
                     suitStart = 'N';
                     break;
                 case '♥':
+                case 'H':
                     suitStart = 'a';
                     break;
                 case '♦':
+                case 'D':
                     suitStart = 'n';
                     break;
             }

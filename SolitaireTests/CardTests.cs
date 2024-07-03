@@ -50,6 +50,15 @@ namespace SolitaireTests
         }
 
         [TestMethod]
+        public void TestFromStringLetters()
+        {
+            Assert.AreEqual('A', Card.FromString("AS"));
+            Assert.AreEqual('O', Card.FromString("2C"));
+            Assert.AreEqual('j', Card.FromString("TH"));
+            Assert.AreEqual('z', Card.FromString("KD"));
+        }
+
+        [TestMethod]
         public void TestFromStringInvalidLength()
         {
             Assert.ThrowsException<ArgumentException>(() => Card.FromString("1"));
